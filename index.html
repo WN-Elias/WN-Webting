@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WN-Webting - Performance-Marketing, Web-Design & Social Media</title>
+<meta name="description" content="WN-Webting verbindet Meta-Ads, Web-Design und Social Media Management zu einem System, das messbar neue Kunden bringt." />
+<!-- Link-only: verhindert, dass Suchmaschinen die Seite listen. Beim offiziellen Launch entfernen. -->
+<meta name="robots" content="noindex, nofollow" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   WN-Webting - single-file marketing site
+   Theme lock: LIGHT for the whole page.
+   Accent lock: ONE accent (electric blue) for all action colors.
+   Shape rule: media/surfaces = 16px, buttons = pill, inputs = 10px.
+   Fonts: Space Grotesk (display) + system sans (body).
+   Hero: vanilla-JS scroll-morph image field (scatter -> ring -> arch).
+   ============================================================ */
+
+:root{
+  --bg:        #f5f5f3;   /* clean warm off-white */
+  --bg-2:      #ffffff;   /* elevated surface / cards */
+  --bg-3:      #ecebe7;   /* tinted band */
+  --text:      #161618;
+  --muted:     #62626b;
+  --muted-2:   #9a9aa1;
+  --line:      rgba(0,0,0,.10);
+  --line-2:    rgba(0,0,0,.15);
+  --accent:    #2f4bff;   /* standout action color - single accent */
+  --accent-hover:#1e3bf0;
+  --accent-ink:#ffffff;   /* text ON the accent */
+  --radius:    16px;
+  --radius-sm: 10px;
+  --maxw:      1240px;
+  --ease:      cubic-bezier(.16,1,.3,1);
+  --sans:      system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --display:   "Space Grotesk", var(--sans);
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  letter-spacing:-.005em;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{ font-family:var(--display); font-weight:600; line-height:1.02; letter-spacing:-.03em; margin:0; }
+p{ margin:0; }
+a{ color:inherit; text-decoration:none; }
+img{ display:block; max-width:100%; }
+.wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+.muted{ color:var(--muted); }
+.accent{ color:var(--accent); }
+
+/* ---------- buttons (pill) ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:.55rem;
+  font-family:var(--display); font-weight:600; font-size:.95rem;
+  padding:.85rem 1.4rem; border-radius:999px;
+  border:1px solid transparent; cursor:pointer;
+  transition:transform .18s var(--ease), background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
+  will-change:transform; white-space:nowrap;
+}
+.btn:active{ transform:translateY(1px) scale(.985); }
+.btn-primary{ background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 24px rgba(47,75,255,.22); }
+.btn-primary:hover{ background:var(--accent-hover); }
+.btn-ghost{ background:transparent; color:var(--text); border-color:var(--line-2); }
+.btn-ghost:hover{ border-color:var(--text); }
+.btn-arrow{ font-size:1.1em; transition:transform .2s var(--ease); }
+.btn:hover .btn-arrow{ transform:translateX(3px); }
+
+/* eyebrow (rationed: max 1 per 3 sections) */
+.eyebrow{
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-family:var(--display); font-size:.78rem; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
+}
+.eyebrow::before{ content:""; width:22px; height:1px; background:var(--accent); }
+
+/* ---------- nav ---------- */
+header.nav{
+  position:sticky; top:0; z-index:50; height:70px;
+  display:flex; align-items:center;
+  background:rgba(245,245,243,.78);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  border-bottom:1px solid var(--line);
+}
+.nav .wrap{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; }
+.brand{ font-family:var(--display); font-weight:700; font-size:1.15rem; letter-spacing:-.02em; display:flex; align-items:center; gap:.55rem; }
+.brand .dot{ width:9px; height:9px; border-radius:999px; background:var(--accent); box-shadow:0 0 12px rgba(47,75,255,.6); }
+.nav-links{ display:flex; align-items:center; gap:2rem; }
+.nav-links a{ font-size:.95rem; color:var(--muted); transition:color .2s var(--ease); }
+.nav-links a:hover{ color:var(--text); }
+.nav-cta{ display:flex; align-items:center; gap:1rem; }
+
+/* ---------- hero (scroll-morph image field, centered composition) ---------- */
+.hero{ position:relative; height:100dvh; min-height:640px; overflow:hidden; }
+.hero-stage{ position:absolute; inset:0; z-index:1; }
+.hero-card{
+  position:absolute; left:50%; top:50%;
+  width:64px; height:90px; margin:-45px 0 0 -32px;
+  border-radius:12px; overflow:hidden; will-change:transform,opacity;
+  box-shadow:0 10px 26px rgba(0,0,0,.14); background:#ddd;
+}
+.hero-card img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.03); }
+.hero-card::after{ content:""; position:absolute; inset:0; background:rgba(47,75,255,.06); }
+
+.hero-center{
+  position:absolute; inset:0; z-index:10; pointer-events:none;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:0 24px;
+}
+/* soft spotlight scrim: keeps copy readable above the image ring on every screen.
+   z-index:-1 sits above the card stage (z1) but below the hero text. */
+.hero-center::before{
+  content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(760px,94vw); height:min(560px,72vh); z-index:-1; pointer-events:none;
+  background:radial-gradient(closest-side, var(--bg) 46%, rgba(245,245,243,.7) 66%, rgba(245,245,243,0) 82%);
+  filter:blur(6px);
+}
+.hero-center > *{ pointer-events:auto; }
+.hero-center .eyebrow{ justify-content:center; }
+.hero h1{ font-size:clamp(2.6rem, 6.4vw, 5rem); margin:1.2rem 0 0; max-width:16ch; }
+.hero h1 em{ font-style:italic; color:var(--accent); }
+.hero-sub{ font-size:1.12rem; color:var(--muted); margin:1.3rem auto 0; max-width:38ch; }
+.hero-actions{ display:flex; gap:.9rem; margin-top:2rem; flex-wrap:wrap; justify-content:center; }
+
+/* ---------- logo marquee (the ONE marquee on the page) ---------- */
+.proof{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:34px 0; background:var(--bg-2); }
+.proof-label{ text-align:center; font-size:.85rem; color:var(--muted-2); margin-bottom:22px; }
+.marquee{ position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.marquee-track{ display:flex; gap:64px; width:max-content; animation:scroll 34s linear infinite; }
+.marquee:hover .marquee-track{ animation-play-state:paused; }
+.marquee img{ height:26px; opacity:.5; filter:grayscale(1); transition:opacity .2s var(--ease); }
+.marquee img:hover{ opacity:1; }
+@keyframes scroll{ to{ transform:translateX(-50%); } }
+
+/* ---------- section shell ---------- */
+section:not(.hero){ padding:112px 0; }
+.sec-head{ max-width:60ch; margin-bottom:56px; }
+.sec-head h2{ font-size:clamp(2rem, 4vw, 3.1rem); margin-top:1rem; }
+.sec-head p{ color:var(--muted); margin-top:1.1rem; font-size:1.08rem; }
+
+/* ---------- services (asymmetric bento, 3 cells) ---------- */
+.bento{ display:grid; grid-template-columns:1.4fr 1fr; grid-auto-rows:minmax(220px, auto); gap:20px; }
+.cell{
+  position:relative; border:1px solid var(--line); border-radius:var(--radius);
+  padding:34px; background:var(--bg-2); overflow:hidden;
+  display:flex; flex-direction:column; justify-content:space-between;
+  transition:border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
+}
+.cell:hover{ border-color:var(--line-2); transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,.06); }
+.cell.lead{ grid-row:span 2; background:var(--bg-2); }
+.cell-num{ font-family:var(--display); color:var(--accent); font-size:.9rem; letter-spacing:.05em; font-weight:600; }
+.cell h3{ font-size:1.6rem; margin:1.1rem 0 .7rem; }
+.cell.lead h3{ font-size:2.1rem; }
+.cell p{ color:var(--muted); max-width:44ch; }
+.cell ul{ list-style:none; padding:0; margin:1.4rem 0 0; display:flex; flex-wrap:wrap; gap:.5rem; }
+.cell li{ font-size:.85rem; color:var(--text); border:1px solid var(--line-2); border-radius:999px; padding:.35rem .8rem; }
+.cell .glow{ position:absolute; inset:auto -30% -40% auto; width:60%; height:70%; background:radial-gradient(circle, rgba(47,75,255,.10), transparent 70%); pointer-events:none; }
+.cell.media{ padding:0; min-height:220px; }
+.cell.media img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.04); }
+.cell.media .media-cap{ position:absolute; left:24px; bottom:22px; color:#fff; font-family:var(--display); font-weight:600; font-size:1.15rem; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+
+/* ---------- results band (full-width metrics, no cards) ---------- */
+.results{ background:var(--bg-3); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.metrics{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
+.metric{ padding:14px 28px 14px 0; border-right:1px solid var(--line); }
+.metric:last-child{ border-right:none; }
+.metric b{ font-family:var(--display); font-weight:600; font-size:clamp(2.6rem,5vw,3.8rem); line-height:1; display:block; letter-spacing:-.04em; }
+.metric span{ display:block; margin-top:.7rem; color:var(--muted); font-size:.98rem; }
+.results-note{ margin-top:34px; font-size:.82rem; color:var(--muted-2); }
+
+/* ---------- process (numbered horizontal steps) ---------- */
+.steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+.step{ background:var(--bg-2); padding:38px 32px; }
+.step-n{ font-family:var(--display); font-size:2.4rem; font-weight:700; color:var(--accent); letter-spacing:-.04em; }
+.step h3{ font-size:1.35rem; margin:1rem 0 .6rem; }
+.step p{ color:var(--muted); font-size:.98rem; }
+
+/* ---------- cases (alternating large media, capped) ---------- */
+.case{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; margin-bottom:44px; }
+.case:last-child{ margin-bottom:0; }
+.case.flip .case-media{ order:2; }
+.case-media{ border-radius:var(--radius); overflow:hidden; border:1px solid var(--line); aspect-ratio:16/11; position:relative; }
+.case-media img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05); transition:filter .5s var(--ease), transform .6s var(--ease); }
+.case-media:hover img{ filter:grayscale(0) contrast(1); transform:scale(1.03); }
+.case-body h3{ font-size:1.9rem; margin:1rem 0 .8rem; }
+.case-body p{ color:var(--muted); max-width:46ch; }
+.case-result{ display:flex; gap:36px; margin-top:1.8rem; }
+.case-result div b{ font-family:var(--display); font-size:2rem; font-weight:600; display:block; color:var(--accent); line-height:1; }
+.case-result div span{ font-size:.86rem; color:var(--muted); }
+
+/* ---------- testimonials ---------- */
+.quotes{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.quote{ border:1px solid var(--line); border-radius:var(--radius); padding:38px; background:var(--bg-2); }
+.quote blockquote{ margin:0; font-family:var(--display); font-size:1.35rem; font-weight:500; line-height:1.35; letter-spacing:-.02em; }
+.quote .who{ display:flex; align-items:center; gap:.9rem; margin-top:26px; }
+.quote .who img{ width:44px; height:44px; border-radius:999px; object-fit:cover; filter:grayscale(1); }
+.quote .who b{ font-weight:600; display:block; font-size:.98rem; }
+.quote .who span{ color:var(--muted); font-size:.86rem; }
+
+/* ---------- CTA + form ---------- */
+.cta-inner{
+  border:1px solid var(--line-2); border-radius:calc(var(--radius) + 6px);
+  background:
+    radial-gradient(120% 120% at 100% 0%, rgba(47,75,255,.08), transparent 55%),
+    var(--bg-2);
+  padding:64px; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
+}
+.cta-inner h2{ font-size:clamp(2rem,4vw,3rem); }
+.cta-inner p{ color:var(--muted); margin-top:1.2rem; max-width:40ch; }
+form{ display:grid; gap:18px; }
+.field{ display:grid; gap:8px; }
+.field label{ font-size:.86rem; color:var(--text); font-family:var(--display); font-weight:500; }
+.field input, .field textarea{
+  width:100%; background:var(--bg); border:1px solid var(--line-2); color:var(--text);
+  border-radius:var(--radius-sm); padding:.85rem 1rem; font-family:var(--sans); font-size:1rem;
+  transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+.field input::placeholder, .field textarea::placeholder{ color:var(--muted-2); }
+.field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,75,255,.15); }
+.field textarea{ min-height:96px; resize:vertical; }
+form .btn-primary{ justify-content:center; margin-top:4px; }
+.form-note{ font-size:.8rem; color:var(--muted-2); text-align:center; }
+.form-ok{ display:none; padding:1rem; border:1px solid var(--accent); border-radius:var(--radius-sm); color:var(--accent); font-family:var(--display); text-align:center; }
+
+/* ---------- footer ---------- */
+footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--bg-2); }
+.foot-top{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; margin-bottom:48px; }
+.foot-brand{ max-width:30ch; }
+.foot-brand p{ color:var(--muted); margin-top:1rem; font-size:.95rem; }
+.foot-cols{ display:flex; gap:72px; flex-wrap:wrap; }
+.foot-col h4{ font-size:.8rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted-2); font-family:var(--display); font-weight:600; margin-bottom:1rem; }
+.foot-col a{ display:block; color:var(--muted); font-size:.95rem; padding:.28rem 0; transition:color .2s var(--ease); }
+.foot-col a:hover{ color:var(--text); }
+.foot-bottom{ display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; padding-top:26px; border-top:1px solid var(--line); color:var(--muted-2); font-size:.85rem; }
+
+/* ---------- scroll reveal ---------- */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in{ opacity:1; transform:none; }
+
+/* ---------- responsive ---------- */
+@media (max-width:960px){
+  .nav-links{ display:none; }
+  .hero h1{ font-size:clamp(2.2rem,9vw,3.4rem); }
+  .bento{ grid-template-columns:1fr; }
+  .cell.lead{ grid-row:auto; }
+  .metrics{ grid-template-columns:1fr 1fr; gap:1px; background:var(--line); }
+  .metric{ background:var(--bg-3); padding:26px; border:none; }
+  .steps{ grid-template-columns:1fr; }
+  .case, .case.flip .case-media{ grid-template-columns:1fr; order:0; }
+  .case-media{ order:-1; }
+  .quotes{ grid-template-columns:1fr; }
+  .cta-inner{ grid-template-columns:1fr; padding:36px 26px; gap:32px; }
+}
+@media (max-width:520px){
+  .wrap{ padding:0 18px; }
+  section:not(.hero){ padding:80px 0; }
+  .metrics{ grid-template-columns:1fr; }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  .reveal{ opacity:1; transform:none; }
+  .marquee-track{ animation:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV (single line, 70px) -->
+<header class="nav">
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="dot"></span>WN-Webting</a>
+    <nav class="nav-links">
+      <a href="#leistungen">Leistungen</a>
+      <a href="#vorgehen">Vorgehen</a>
+      <a href="#cases">Cases</a>
+      <a href="#kontakt">Kontakt</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="#kontakt" class="btn btn-primary" data-magnetic>Erstgespräch <span class="btn-arrow">&rarr;</span></a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO (scroll-morph image field) -->
+<section class="hero" id="top">
+  <div class="hero-stage" id="hero-stage" aria-hidden="true"></div>
+  <div class="hero-center">
+    <span class="eyebrow">Performance-Marketing Agentur</span>
+    <h1>Sichtbar werden.<br><em>Kunden</em> gewinnen.</h1>
+    <p class="hero-sub">WN-Webting verbindet Meta-Ads, Web-Design und Social Media zu einem System, das messbar neue Kunden bringt.</p>
+    <div class="hero-actions">
+      <a href="#kontakt" class="btn btn-primary" data-magnetic>Kostenloses Erstgespräch <span class="btn-arrow">&rarr;</span></a>
+      <a href="#leistungen" class="btn btn-ghost">Unsere Leistungen</a>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF (the one marquee) -->
+<div class="proof">
+  <div class="wrap">
+    <p class="proof-label">Wir arbeiten dort, wo Ihre Kunden täglich sind</p>
+    <div class="marquee">
+      <div class="marquee-track">
+        <img src="https://cdn.simpleicons.org/meta/18181b" alt="Meta" />
+        <img src="https://cdn.simpleicons.org/instagram/18181b" alt="Instagram" />
+        <img src="https://cdn.simpleicons.org/facebook/18181b" alt="Facebook" />
+        <img src="https://cdn.simpleicons.org/tiktok/18181b" alt="TikTok" />
+        <img src="https://cdn.simpleicons.org/googleads/18181b" alt="Google Ads" />
+        <img src="https://cdn.simpleicons.org/pinterest/18181b" alt="Pinterest" />
+        <img src="https://cdn.simpleicons.org/youtube/18181b" alt="YouTube" />
+        <img src="https://cdn.simpleicons.org/shopify/18181b" alt="Shopify" />
+        <img src="https://cdn.simpleicons.org/meta/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/instagram/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/facebook/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/tiktok/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/googleads/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/pinterest/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/youtube/18181b" alt="" aria-hidden="true" />
+        <img src="https://cdn.simpleicons.org/shopify/18181b" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEISTUNGEN (asymmetric bento, exactly 3 cells) -->
+<section id="leistungen">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Leistungen</span>
+      <h2>Drei Bausteine, ein Ergebnis: mehr Anfragen.</h2>
+      <p>Wir bauen kein Marketing in Silos. Anzeigen, Website und Content greifen ineinander, damit aus Aufmerksamkeit zahlende Kunden werden.</p>
+    </div>
+    <div class="bento">
+      <div class="cell lead reveal">
+        <div class="glow"></div>
+        <div>
+          <span class="cell-num">01</span>
+          <h3>Meta-Ads</h3>
+          <p>Kampagnen auf Facebook und Instagram, die planbar Anfragen liefern. Wir testen Zielgruppen und Creatives systematisch und skalieren, was funktioniert.</p>
+        </div>
+        <ul>
+          <li>Kampagnenstrategie</li>
+          <li>Creative-Produktion</li>
+          <li>A/B-Testing</li>
+          <li>Tracking &amp; Reporting</li>
+        </ul>
+      </div>
+      <div class="cell reveal">
+        <div>
+          <span class="cell-num">02</span>
+          <h3>Web-Design</h3>
+          <p>Websites, die schnell laden, gut aussehen und Besucher zu Anfragen führen.</p>
+        </div>
+        <ul>
+          <li>Landingpages</li>
+          <li>Conversion-Optimierung</li>
+        </ul>
+      </div>
+      <div class="cell media reveal">
+        <img src="https://picsum.photos/seed/wn-webting-social-content/700/500" alt="Social-Media-Content-Produktion" loading="lazy" />
+        <span class="media-cap">03 &nbsp; Social Media</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS band (full-width metrics, no cards) -->
+<section class="results">
+  <div class="wrap">
+    <div class="metrics reveal">
+      <div class="metric"><b>+142%</b><span>mehr qualifizierte Anfragen im Schnitt</span></div>
+      <div class="metric"><b>3,4x</b><span>durchschnittlicher Return on Ad Spend</span></div>
+      <div class="metric"><b>48</b><span>betreute Marken seit 2021</span></div>
+      <div class="metric"><b>&lt;14 Tage</b><span>bis zur ersten Live-Kampagne</span></div>
+    </div>
+    <p class="results-note">Beispielhafte Durchschnittswerte aus laufenden Mandaten. Ergebnisse variieren je nach Branche und Budget.</p>
+  </div>
+</section>
+
+<!-- VORGEHEN (numbered horizontal steps) -->
+<section id="vorgehen">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2>So arbeiten wir zusammen.</h2>
+      <p>Kein Blindflug. Sie wissen von Tag eins, woran wir arbeiten und woran wir gemessen werden.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-n">01</div>
+        <h3>Analyse</h3>
+        <p>Wir schauen uns Zahlen, Zielgruppe und Wettbewerb an und definieren gemeinsam ein klares Ziel.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <h3>Aufbau</h3>
+        <p>Wir bauen Website, Tracking und die ersten Kampagnen auf. Sauber, messbar und startklar.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <h3>Skalierung</h3>
+        <p>Was funktioniert, bekommt mehr Budget. Was nicht liefert, fliegt raus. Jeden Monat besser.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASES (alternating large media, max 2 consecutive) -->
+<section id="cases">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Ausgewählte Cases</span>
+      <h2>Zahlen, die für sich sprechen.</h2>
+    </div>
+
+    <div class="case reveal">
+      <div class="case-media">
+        <img src="https://picsum.photos/seed/lindgruen-interior-shop/900/620" alt="Lindgruen Interior Onlineshop" loading="lazy" />
+      </div>
+      <div class="case-body">
+        <span class="cell-num">Interior &amp; E-Commerce</span>
+        <h3>Lindgruen Interior</h3>
+        <p>Neue Landingpage plus Meta-Kampagnen für den Möbel-Onlineshop. In vier Monaten vom Nebengeschäft zur planbaren Umsatzquelle.</p>
+        <div class="case-result">
+          <div><b>4,1x</b><span>Return on Ad Spend</span></div>
+          <div><b>-38%</b><span>Kosten pro Bestellung</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="case flip reveal">
+      <div class="case-media">
+        <img src="https://picsum.photos/seed/nordform-studio-brand/900/620" alt="Nordform Studio Markenauftritt" loading="lazy" />
+      </div>
+      <div class="case-body">
+        <span class="cell-num">Handwerk &amp; Dienstleistung</span>
+        <h3>Nordform Studio</h3>
+        <p>Social Media Management und Lead-Kampagnen für das Tischler-Studio. Der Terminkalender ist heute Wochen im Voraus gefüllt.</p>
+        <div class="case-result">
+          <div><b>+210%</b><span>Anfragen pro Monat</span></div>
+          <div><b>6 Wo.</b><span>Vorlauf im Kalender</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <h2>Was Kundinnen und Kunden sagen.</h2>
+    </div>
+    <div class="quotes">
+      <figure class="quote reveal">
+        <blockquote>"Zum ersten Mal weiß ich genau, was mein Marketing bringt. Die Anfragen kommen konstant, nicht mehr in Wellen."</blockquote>
+        <figcaption class="who">
+          <img src="https://picsum.photos/seed/jana-brehm-portrait/120/120" alt="" />
+          <div><b>Jana Brehm</b><span>Gründerin, Lindgruen Interior</span></div>
+        </figcaption>
+      </figure>
+      <figure class="quote reveal">
+        <blockquote>"Ehrliche Beratung statt Buzzwords. WN-Webting hat unseren Kalender in drei Monaten spürbar voller gemacht."</blockquote>
+        <figcaption class="who">
+          <img src="https://picsum.photos/seed/marek-falk-portrait/120/120" alt="" />
+          <div><b>Marek Falk</b><span>Geschäftsführer, Nordform Studio</span></div>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- CTA + KONTAKT -->
+<section id="kontakt">
+  <div class="wrap">
+    <div class="cta-inner reveal">
+      <div>
+        <h2>Lassen Sie uns über Ihr Wachstum sprechen.</h2>
+        <p>Im kostenlosen Erstgespräch schauen wir auf Ihre Ziele und sagen ehrlich, ob und wie wir helfen können. Ganz ohne Verpflichtung.</p>
+      </div>
+      <form id="lead-form" novalidate>
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" name="name" type="text" placeholder="Vor- und Nachname" required />
+        </div>
+        <div class="field">
+          <label for="email">E-Mail</label>
+          <input id="email" name="email" type="email" placeholder="name@unternehmen.de" required />
+        </div>
+        <div class="field">
+          <label for="msg">Worum geht es?</label>
+          <textarea id="msg" name="msg" placeholder="Kurz zu Ihrem Unternehmen und Ihrem Ziel"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" data-magnetic>Erstgespräch anfragen <span class="btn-arrow">&rarr;</span></button>
+        <p class="form-note">Antwort in der Regel innerhalb von 24 Stunden.</p>
+        <div class="form-ok" id="form-ok">Danke. Wir melden uns in Kürze bei Ihnen.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <div class="brand"><span class="dot"></span>WN-Webting</div>
+        <p>Performance-Marketing, Web-Design und Social Media Management für Unternehmen, die wachsen wollen.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h4>Leistungen</h4>
+          <a href="#leistungen">Meta-Ads</a>
+          <a href="#leistungen">Web-Design</a>
+          <a href="#leistungen">Social Media</a>
+        </div>
+        <div class="foot-col">
+          <h4>Unternehmen</h4>
+          <a href="#vorgehen">Vorgehen</a>
+          <a href="#cases">Cases</a>
+          <a href="#kontakt">Kontakt</a>
+        </div>
+        <div class="foot-col">
+          <h4>Social</h4>
+          <a href="#" rel="noopener">Instagram</a>
+          <a href="#" rel="noopener">LinkedIn</a>
+          <a href="mailto:hallo@wn-webting.de">hallo@wn-webting.de</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>&copy; 2026 WN-Webting. Alle Rechte vorbehalten.</span>
+      <span><a href="#">Impressum</a> &nbsp; <a href="#">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   Scroll-morph hero (vanilla port of the React/framer-motion idea).
+   Images fly in (scatter -> line -> ring), then morph from a ring
+   into a bottom arch as the user scrolls the page. Mouse parallax on X.
+   Driven by direct transforms in a single rAF loop (no React, no
+   per-frame scroll re-renders). Honors prefers-reduced-motion.
+   ============================================================ */
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var IMAGES = [
+    "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=200&q=70",
+    "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=200&q=70",
+    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&q=70",
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=200&q=70",
+    "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=200&q=70",
+    "https://images.unsplash.com/photo-1506765515384-028b60a970df?w=200&q=70",
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&q=70",
+    "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200&q=70",
+    "https://images.unsplash.com/photo-1500485035595-cbe6f645feb1?w=200&q=70",
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=200&q=70",
+    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=200&q=70",
+    "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=200&q=70",
+    "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=200&q=70",
+    "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=200&q=70",
+    "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=200&q=70",
+    "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?w=200&q=70",
+    "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?w=200&q=70",
+    "https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f?w=200&q=70",
+    "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?w=200&q=70",
+    "https://images.unsplash.com/photo-1496568816309-51d7c20e3b21?w=200&q=70"
+  ];
+  var TOTAL = IMAGES.length;
+  var stage = document.getElementById('hero-stage');
+  var hero  = document.getElementById('top');
+  if(!stage) return;
+
+  // Build cards + per-card current transform state.
+  var cards = [];
+  var cur = [];       // eased current values
+  var scatter = [];   // random intro positions
+  for(var i=0;i<TOTAL;i++){
+    var el = document.createElement('div');
+    el.className = 'hero-card';
+    var img = document.createElement('img');
+    img.src = IMAGES[i]; img.alt = ''; img.loading = 'eager';
+    el.appendChild(img);
+    stage.appendChild(el);
+    cards.push(el);
+    cur.push({ x:0, y:0, r:0, s:0.6 });
+    scatter.push({
+      x:(Math.random()-0.5)*1400,
+      y:(Math.random()-0.5)*900,
+      r:(Math.random()-0.5)*180
+    });
+  }
+
+  var phase = 'scatter';               // scatter -> line -> ring
+  var opT = 0, op = 0;                  // global fade-in
+  var morphT = 0, morph = 0;           // 0 = ring, 1 = bottom arch
+  var shuffleT = 0, shuffle = 0;       // extra arch rotation as scroll continues
+  var plxT = 0, plx = 0;               // mouse parallax (px)
+
+  function size(){
+    var w = stage.clientWidth, h = stage.clientHeight;
+    return { w:w, h:h, mobile:w < 768 };
+  }
+
+  // Compute a card's target transform for the current phase/scroll.
+  function target(i, s){
+    if(phase === 'scatter'){
+      var sc = scatter[i];
+      return { x:sc.x, y:sc.y, r:sc.r, sc:0.6 };
+    }
+    if(phase === 'line'){
+      var gap = 70, tot = TOTAL*gap;
+      return { x:i*gap - tot/2, y:0, r:0, sc:1 };
+    }
+    // ring position
+    var minD = Math.min(s.w, s.h);
+    var cr = s.mobile ? Math.min(s.w*0.44, 200) : Math.min(minD*0.35, 300);
+    var ca = (i/TOTAL)*360, crad = ca*Math.PI/180;
+    var ringX = Math.cos(crad)*cr, ringY = Math.sin(crad)*cr, ringR = ca+90;
+
+    // bottom-arch position
+    var baseR = Math.min(s.w, s.h*1.5);
+    var arcR  = baseR*(s.mobile?1.4:1.1);
+    var apexY = s.h*(s.mobile?0.35:0.25);
+    var cy    = apexY + arcR;
+    var spread = s.mobile?100:130;
+    var start  = -90 - spread/2;
+    var step   = spread/(TOTAL-1);
+    var bounded = -shuffle*(spread*0.8);
+    var ang = start + i*step + bounded;
+    var arad = ang*Math.PI/180;
+    var arcX = Math.cos(arad)*arcR + plx;
+    var arcY = Math.sin(arad)*arcR + cy;
+    var arcS = s.mobile?1.4:1.8;
+
+    return {
+      x: ringX + (arcX-ringX)*morph,
+      y: ringY + (arcY-ringY)*morph,
+      r: ringR + ((ang+90)-ringR)*morph,
+      sc: 1 + (arcS-1)*morph
+    };
+  }
+
+  function apply(){
+    var s = size();
+    for(var i=0;i<TOTAL;i++){
+      var t = target(i, s);
+      var c = cur[i];
+      // ease toward target (spring-like)
+      c.x += (t.x - c.x)*0.10;
+      c.y += (t.y - c.y)*0.10;
+      c.r += (t.r - c.r)*0.10;
+      c.s += (t.sc - c.s)*0.10;
+      cards[i].style.transform =
+        'translate('+c.x.toFixed(2)+'px,'+c.y.toFixed(2)+'px) rotate('+c.r.toFixed(2)+'deg) scale('+c.s.toFixed(3)+')';
+      cards[i].style.opacity = op.toFixed(3);
+    }
+  }
+
+  // Scroll -> morph/shuffle targets. Read scroll only inside rAF.
+  function readScroll(){
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    morphT   = Math.min(Math.max(y/600, 0), 1);
+    shuffleT = Math.min(Math.max((y-600)/1600, 0), 1);
+  }
+
+  var running = true;
+  function loop(){
+    if(running){
+      readScroll();
+      // ease scalar states
+      op      += (opT - op)*0.06;
+      morph   += (morphT - morph)*0.08;
+      shuffle += (shuffleT - shuffle)*0.08;
+      plx     += (plxT - plx)*0.06;
+      apply();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // Pause the loop while the hero is off-screen (perf).
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(e){
+      running = e[0].isIntersecting;
+    }, { threshold:0 }).observe(hero);
+  }
+
+  // Mouse parallax over the hero.
+  if(!reduce && window.matchMedia('(pointer:fine)').matches){
+    hero.addEventListener('mousemove', function(e){
+      var r = hero.getBoundingClientRect();
+      var nx = ((e.clientX - r.left)/r.width)*2 - 1;
+      plxT = nx*80;
+    });
+    hero.addEventListener('mouseleave', function(){ plxT = 0; });
+  }
+
+  // Intro choreography.
+  if(reduce){
+    phase = 'ring'; op = 1; opT = 1;
+    // snap cards to their computed positions instantly
+    for(var j=0;j<TOTAL;j++){ var s0=size(); var t0=target(j,s0); cur[j]={x:t0.x,y:t0.y,r:t0.r,s:t0.sc}; }
+  } else {
+    opT = 1;
+    setTimeout(function(){ phase = 'line'; }, 450);
+    setTimeout(function(){ phase = 'ring'; }, 1900);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* Scroll reveal + magnetic buttons + form (shared UI behaviour). */
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els = document.querySelectorAll('.reveal');
+  if(reduce || !('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold:0.15, rootMargin:'0px 0px -8% 0px' });
+    els.forEach(function(el){ io.observe(el); });
+  }
+
+  if(!reduce && window.matchMedia('(pointer:fine)').matches){
+    document.querySelectorAll('[data-magnetic]').forEach(function(btn){
+      var raf;
+      btn.addEventListener('mousemove', function(e){
+        var r = btn.getBoundingClientRect();
+        var x = (e.clientX - r.left - r.width/2) * 0.25;
+        var y = (e.clientY - r.top - r.height/2) * 0.35;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(function(){ btn.style.transform = 'translate('+x+'px,'+y+'px)'; });
+      });
+      btn.addEventListener('mouseleave', function(){ cancelAnimationFrame(raf); btn.style.transform=''; });
+    });
+  }
+
+  var form = document.getElementById('lead-form');
+  if(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var name = form.querySelector('#name'), email = form.querySelector('#email');
+      if(!name.value.trim() || !email.value.trim()){ (name.value.trim()?email:name).focus(); return; }
+      form.querySelectorAll('.field, .btn, .form-note').forEach(function(el){ el.style.display='none'; });
+      document.getElementById('form-ok').style.display='block';
+    });
+  }
+})();
+</script>
+</body>
+</html>
