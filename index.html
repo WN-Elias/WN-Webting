@@ -12,273 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-<style>
-/* ============================================================
-   WN-Webting - single-file marketing site
-   Theme lock: LIGHT for the whole page.
-   Accent lock: ONE accent (electric blue) for all action colors.
-   Shape rule: media/surfaces = 16px, buttons = pill, inputs = 10px.
-   Fonts: Space Grotesk (display) + system sans (body).
-   Hero: vanilla-JS scroll-morph image field (scatter -> ring -> arch).
-   ============================================================ */
-
-:root{
-  --bg:        #f5f5f3;   /* clean warm off-white */
-  --bg-2:      #ffffff;   /* elevated surface / cards */
-  --bg-3:      #ecebe7;   /* tinted band */
-  --text:      #161618;
-  --muted:     #62626b;
-  --muted-2:   #9a9aa1;
-  --line:      rgba(0,0,0,.10);
-  --line-2:    rgba(0,0,0,.15);
-  --accent:    #2f4bff;   /* standout action color - single accent */
-  --accent-hover:#1e3bf0;
-  --accent-ink:#ffffff;   /* text ON the accent */
-  --radius:    16px;
-  --radius-sm: 10px;
-  --maxw:      1240px;
-  --ease:      cubic-bezier(.16,1,.3,1);
-  --sans:      system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --display:   "Space Grotesk", var(--sans);
-}
-
-*{ box-sizing:border-box; }
-html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--sans);
-  font-size:16px;
-  line-height:1.6;
-  letter-spacing:-.005em;
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
-}
-h1,h2,h3,h4{ font-family:var(--display); font-weight:600; line-height:1.02; letter-spacing:-.03em; margin:0; }
-p{ margin:0; }
-a{ color:inherit; text-decoration:none; }
-img{ display:block; max-width:100%; }
-.wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 24px; }
-.muted{ color:var(--muted); }
-.accent{ color:var(--accent); }
-
-/* ---------- buttons (pill) ---------- */
-.btn{
-  display:inline-flex; align-items:center; gap:.55rem;
-  font-family:var(--display); font-weight:600; font-size:.95rem;
-  padding:.85rem 1.4rem; border-radius:999px;
-  border:1px solid transparent; cursor:pointer;
-  transition:transform .18s var(--ease), background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease);
-  will-change:transform; white-space:nowrap;
-}
-.btn:active{ transform:translateY(1px) scale(.985); }
-.btn-primary{ background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 24px rgba(47,75,255,.22); }
-.btn-primary:hover{ background:var(--accent-hover); }
-.btn-ghost{ background:transparent; color:var(--text); border-color:var(--line-2); }
-.btn-ghost:hover{ border-color:var(--text); }
-.btn-arrow{ font-size:1.1em; transition:transform .2s var(--ease); }
-.btn:hover .btn-arrow{ transform:translateX(3px); }
-
-/* eyebrow (rationed: max 1 per 3 sections) */
-.eyebrow{
-  display:inline-flex; align-items:center; gap:.5rem;
-  font-family:var(--display); font-size:.78rem; font-weight:500;
-  letter-spacing:.16em; text-transform:uppercase; color:var(--muted);
-}
-.eyebrow::before{ content:""; width:22px; height:1px; background:var(--accent); }
-
-/* ---------- nav ---------- */
-header.nav{
-  position:sticky; top:0; z-index:50; height:70px;
-  display:flex; align-items:center;
-  background:rgba(245,245,243,.78);
-  backdrop-filter:blur(14px) saturate(140%);
-  -webkit-backdrop-filter:blur(14px) saturate(140%);
-  border-bottom:1px solid var(--line);
-}
-.nav .wrap{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; }
-.brand{ font-family:var(--display); font-weight:700; font-size:1.15rem; letter-spacing:-.02em; display:flex; align-items:center; gap:.55rem; }
-.brand .dot{ width:9px; height:9px; border-radius:999px; background:var(--accent); box-shadow:0 0 12px rgba(47,75,255,.6); }
-.nav-links{ display:flex; align-items:center; gap:2rem; }
-.nav-links a{ font-size:.95rem; color:var(--muted); transition:color .2s var(--ease); }
-.nav-links a:hover{ color:var(--text); }
-.nav-cta{ display:flex; align-items:center; gap:1rem; }
-
-/* ---------- hero (scroll-morph image field, centered composition) ---------- */
-.hero{ position:relative; height:100dvh; min-height:640px; overflow:hidden; }
-.hero-stage{ position:absolute; inset:0; z-index:1; }
-.hero-card{
-  position:absolute; left:50%; top:50%;
-  width:64px; height:90px; margin:-45px 0 0 -32px;
-  border-radius:12px; overflow:hidden; will-change:transform,opacity;
-  box-shadow:0 10px 26px rgba(0,0,0,.14); background:#ddd;
-}
-.hero-card img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.03); }
-.hero-card::after{ content:""; position:absolute; inset:0; background:rgba(47,75,255,.06); }
-
-.hero-center{
-  position:absolute; inset:0; z-index:10; pointer-events:none;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; padding:0 24px;
-}
-/* soft spotlight scrim: keeps copy readable above the image ring on every screen.
-   z-index:-1 sits above the card stage (z1) but below the hero text. */
-.hero-center::before{
-  content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-  width:min(760px,94vw); height:min(560px,72vh); z-index:-1; pointer-events:none;
-  background:radial-gradient(closest-side, var(--bg) 46%, rgba(245,245,243,.7) 66%, rgba(245,245,243,0) 82%);
-  filter:blur(6px);
-}
-.hero-center > *{ pointer-events:auto; }
-.hero-center .eyebrow{ justify-content:center; }
-.hero h1{ font-size:clamp(2.6rem, 6.4vw, 5rem); margin:1.2rem 0 0; max-width:16ch; }
-.hero h1 em{ font-style:italic; color:var(--accent); }
-.hero-sub{ font-size:1.12rem; color:var(--muted); margin:1.3rem auto 0; max-width:38ch; }
-.hero-actions{ display:flex; gap:.9rem; margin-top:2rem; flex-wrap:wrap; justify-content:center; }
-
-/* ---------- logo marquee (the ONE marquee on the page) ---------- */
-.proof{ border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:34px 0; background:var(--bg-2); }
-.proof-label{ text-align:center; font-size:.85rem; color:var(--muted-2); margin-bottom:22px; }
-.marquee{ position:relative; overflow:hidden; -webkit-mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.marquee-track{ display:flex; gap:64px; width:max-content; animation:scroll 34s linear infinite; }
-.marquee:hover .marquee-track{ animation-play-state:paused; }
-.marquee img{ height:26px; opacity:.5; filter:grayscale(1); transition:opacity .2s var(--ease); }
-.marquee img:hover{ opacity:1; }
-@keyframes scroll{ to{ transform:translateX(-50%); } }
-
-/* ---------- section shell ---------- */
-section:not(.hero){ padding:112px 0; }
-.sec-head{ max-width:60ch; margin-bottom:56px; }
-.sec-head h2{ font-size:clamp(2rem, 4vw, 3.1rem); margin-top:1rem; }
-.sec-head p{ color:var(--muted); margin-top:1.1rem; font-size:1.08rem; }
-
-/* ---------- services (asymmetric bento, 3 cells) ---------- */
-.bento{ display:grid; grid-template-columns:1.4fr 1fr; grid-auto-rows:minmax(220px, auto); gap:20px; }
-.cell{
-  position:relative; border:1px solid var(--line); border-radius:var(--radius);
-  padding:34px; background:var(--bg-2); overflow:hidden;
-  display:flex; flex-direction:column; justify-content:space-between;
-  transition:border-color .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
-}
-.cell:hover{ border-color:var(--line-2); transform:translateY(-3px); box-shadow:0 18px 40px rgba(0,0,0,.06); }
-.cell.lead{ grid-row:span 2; background:var(--bg-2); }
-.cell-num{ font-family:var(--display); color:var(--accent); font-size:.9rem; letter-spacing:.05em; font-weight:600; }
-.cell h3{ font-size:1.6rem; margin:1.1rem 0 .7rem; }
-.cell.lead h3{ font-size:2.1rem; }
-.cell p{ color:var(--muted); max-width:44ch; }
-.cell ul{ list-style:none; padding:0; margin:1.4rem 0 0; display:flex; flex-wrap:wrap; gap:.5rem; }
-.cell li{ font-size:.85rem; color:var(--text); border:1px solid var(--line-2); border-radius:999px; padding:.35rem .8rem; }
-.cell .glow{ position:absolute; inset:auto -30% -40% auto; width:60%; height:70%; background:radial-gradient(circle, rgba(47,75,255,.10), transparent 70%); pointer-events:none; }
-.cell.media{ padding:0; min-height:220px; }
-.cell.media img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.04); }
-.cell.media .media-cap{ position:absolute; left:24px; bottom:22px; color:#fff; font-family:var(--display); font-weight:600; font-size:1.15rem; text-shadow:0 2px 12px rgba(0,0,0,.5); }
-
-/* ---------- results band (full-width metrics, no cards) ---------- */
-.results{ background:var(--bg-3); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
-.metrics{ display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
-.metric{ padding:14px 28px 14px 0; border-right:1px solid var(--line); }
-.metric:last-child{ border-right:none; }
-.metric b{ font-family:var(--display); font-weight:600; font-size:clamp(2.6rem,5vw,3.8rem); line-height:1; display:block; letter-spacing:-.04em; }
-.metric span{ display:block; margin-top:.7rem; color:var(--muted); font-size:.98rem; }
-.results-note{ margin-top:34px; font-size:.82rem; color:var(--muted-2); }
-
-/* ---------- process (numbered horizontal steps) ---------- */
-.steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--line); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
-.step{ background:var(--bg-2); padding:38px 32px; }
-.step-n{ font-family:var(--display); font-size:2.4rem; font-weight:700; color:var(--accent); letter-spacing:-.04em; }
-.step h3{ font-size:1.35rem; margin:1rem 0 .6rem; }
-.step p{ color:var(--muted); font-size:.98rem; }
-
-/* ---------- cases (alternating large media, capped) ---------- */
-.case{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; margin-bottom:44px; }
-.case:last-child{ margin-bottom:0; }
-.case.flip .case-media{ order:2; }
-.case-media{ border-radius:var(--radius); overflow:hidden; border:1px solid var(--line); aspect-ratio:16/11; position:relative; }
-.case-media img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05); transition:filter .5s var(--ease), transform .6s var(--ease); }
-.case-media:hover img{ filter:grayscale(0) contrast(1); transform:scale(1.03); }
-.case-body h3{ font-size:1.9rem; margin:1rem 0 .8rem; }
-.case-body p{ color:var(--muted); max-width:46ch; }
-.case-result{ display:flex; gap:36px; margin-top:1.8rem; }
-.case-result div b{ font-family:var(--display); font-size:2rem; font-weight:600; display:block; color:var(--accent); line-height:1; }
-.case-result div span{ font-size:.86rem; color:var(--muted); }
-
-/* ---------- testimonials ---------- */
-.quotes{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
-.quote{ border:1px solid var(--line); border-radius:var(--radius); padding:38px; background:var(--bg-2); }
-.quote blockquote{ margin:0; font-family:var(--display); font-size:1.35rem; font-weight:500; line-height:1.35; letter-spacing:-.02em; }
-.quote .who{ display:flex; align-items:center; gap:.9rem; margin-top:26px; }
-.quote .who img{ width:44px; height:44px; border-radius:999px; object-fit:cover; filter:grayscale(1); }
-.quote .who b{ font-weight:600; display:block; font-size:.98rem; }
-.quote .who span{ color:var(--muted); font-size:.86rem; }
-
-/* ---------- CTA + form ---------- */
-.cta-inner{
-  border:1px solid var(--line-2); border-radius:calc(var(--radius) + 6px);
-  background:
-    radial-gradient(120% 120% at 100% 0%, rgba(47,75,255,.08), transparent 55%),
-    var(--bg-2);
-  padding:64px; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
-}
-.cta-inner h2{ font-size:clamp(2rem,4vw,3rem); }
-.cta-inner p{ color:var(--muted); margin-top:1.2rem; max-width:40ch; }
-form{ display:grid; gap:18px; }
-.field{ display:grid; gap:8px; }
-.field label{ font-size:.86rem; color:var(--text); font-family:var(--display); font-weight:500; }
-.field input, .field textarea{
-  width:100%; background:var(--bg); border:1px solid var(--line-2); color:var(--text);
-  border-radius:var(--radius-sm); padding:.85rem 1rem; font-family:var(--sans); font-size:1rem;
-  transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
-}
-.field input::placeholder, .field textarea::placeholder{ color:var(--muted-2); }
-.field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,75,255,.15); }
-.field textarea{ min-height:96px; resize:vertical; }
-form .btn-primary{ justify-content:center; margin-top:4px; }
-.form-note{ font-size:.8rem; color:var(--muted-2); text-align:center; }
-.form-ok{ display:none; padding:1rem; border:1px solid var(--accent); border-radius:var(--radius-sm); color:var(--accent); font-family:var(--display); text-align:center; }
-
-/* ---------- footer ---------- */
-footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--bg-2); }
-.foot-top{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; margin-bottom:48px; }
-.foot-brand{ max-width:30ch; }
-.foot-brand p{ color:var(--muted); margin-top:1rem; font-size:.95rem; }
-.foot-cols{ display:flex; gap:72px; flex-wrap:wrap; }
-.foot-col h4{ font-size:.8rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted-2); font-family:var(--display); font-weight:600; margin-bottom:1rem; }
-.foot-col a{ display:block; color:var(--muted); font-size:.95rem; padding:.28rem 0; transition:color .2s var(--ease); }
-.foot-col a:hover{ color:var(--text); }
-.foot-bottom{ display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; padding-top:26px; border-top:1px solid var(--line); color:var(--muted-2); font-size:.85rem; }
-
-/* ---------- scroll reveal ---------- */
-.reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
-.reveal.in{ opacity:1; transform:none; }
-
-/* ---------- responsive ---------- */
-@media (max-width:960px){
-  .nav-links{ display:none; }
-  .hero h1{ font-size:clamp(2.2rem,9vw,3.4rem); }
-  .bento{ grid-template-columns:1fr; }
-  .cell.lead{ grid-row:auto; }
-  .metrics{ grid-template-columns:1fr 1fr; gap:1px; background:var(--line); }
-  .metric{ background:var(--bg-3); padding:26px; border:none; }
-  .steps{ grid-template-columns:1fr; }
-  .case, .case.flip .case-media{ grid-template-columns:1fr; order:0; }
-  .case-media{ order:-1; }
-  .quotes{ grid-template-columns:1fr; }
-  .cta-inner{ grid-template-columns:1fr; padding:36px 26px; gap:32px; }
-}
-@media (max-width:520px){
-  .wrap{ padding:0 18px; }
-  section:not(.hero){ padding:80px 0; }
-  .metrics{ grid-template-columns:1fr; }
-}
-
-/* ---------- reduced motion ---------- */
-@media (prefers-reduced-motion:reduce){
-  *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
-  .reveal{ opacity:1; transform:none; }
-  .marquee-track{ animation:none; }
-}
-</style>
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
@@ -289,7 +23,6 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
     <nav class="nav-links">
       <a href="#leistungen">Leistungen</a>
       <a href="#vorgehen">Vorgehen</a>
-      <a href="#cases">Cases</a>
       <a href="#kontakt">Kontakt</a>
     </nav>
     <div class="nav-cta">
@@ -347,141 +80,131 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
       <h2>Drei Bausteine, ein Ergebnis: mehr Anfragen.</h2>
       <p>Wir bauen kein Marketing in Silos. Anzeigen, Website und Content greifen ineinander, damit aus Aufmerksamkeit zahlende Kunden werden.</p>
     </div>
-    <div class="bento">
-      <div class="cell lead reveal">
-        <div class="glow"></div>
-        <div>
-          <span class="cell-num">01</span>
-          <h3>Meta-Ads</h3>
-          <p>Kampagnen auf Facebook und Instagram, die planbar Anfragen liefern. Wir testen Zielgruppen und Creatives systematisch und skalieren, was funktioniert.</p>
+    <div class="services-grid">
+      <article class="service-card reveal">
+        <div class="service-media">
+          <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=760&h=520&fit=crop&q=75" alt="Kampagnen-Dashboard mit Statistiken auf einem Laptop" loading="lazy" />
         </div>
-        <ul>
-          <li>Kampagnenstrategie</li>
-          <li>Creative-Produktion</li>
-          <li>A/B-Testing</li>
-          <li>Tracking &amp; Reporting</li>
-        </ul>
-      </div>
-      <div class="cell reveal">
-        <div>
-          <span class="cell-num">02</span>
-          <h3>Web-Design</h3>
-          <p>Websites, die schnell laden, gut aussehen und Besucher zu Anfragen führen.</p>
+        <h3>Meta-Ads</h3>
+        <p>Mit gezielten Facebook- und Instagram-Kampagnen helfen wir dir dabei, mehr qualifizierte Anfragen und potenzielle Neukunden zu gewinnen.</p>
+        <a href="meta-ads.html" class="btn btn-primary">Mehr erfahren</a>
+      </article>
+
+      <article class="service-card reveal">
+        <div class="service-media">
+          <img src="https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=760&h=520&fit=crop&q=75" alt="Social-Media-App auf einem Smartphone" loading="lazy" />
         </div>
-        <ul>
-          <li>Landingpages</li>
-          <li>Conversion-Optimierung</li>
-        </ul>
-      </div>
-      <div class="cell media reveal">
-        <img src="https://picsum.photos/seed/wn-webting-social-content/700/500" alt="Social-Media-Content-Produktion" loading="lazy" />
-        <span class="media-cap">03 &nbsp; Social Media</span>
-      </div>
+        <h3>Social-Media-Management</h3>
+        <p>Nutze das Potenzial von Social Media, um mehr Aufmerksamkeit für dein Unternehmen zu gewinnen. Wir unterstützen dich bei der Erstellung von Inhalten, der Optimierung deiner Kanäle und dem Aufbau einer stärkeren Online-Präsenz.</p>
+        <a href="social-media-management.html" class="btn btn-primary">Mehr erfahren</a>
+      </article>
+
+      <article class="service-card reveal">
+        <div class="service-media">
+          <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?w=760&h=520&fit=crop&q=75" alt="Web-Design Arbeitsplatz mit Laptop" loading="lazy" />
+        </div>
+        <h3>Website-Management</h3>
+        <p>Eine moderne Website ist oft der erste Eindruck, den potenzielle Kunden von deinem Unternehmen erhalten. Wir sorgen dafür, dass deine Website aktuell, übersichtlich und benutzerfreundlich bleibt.</p>
+        <a href="website-management.html" class="btn btn-primary">Mehr erfahren</a>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- RESULTS band (full-width metrics, no cards) -->
+<!-- PROMISES band (full-width, no cards) -->
 <section class="results">
   <div class="wrap">
     <div class="metrics reveal">
-      <div class="metric"><b>+142%</b><span>mehr qualifizierte Anfragen im Schnitt</span></div>
-      <div class="metric"><b>3,4x</b><span>durchschnittlicher Return on Ad Spend</span></div>
-      <div class="metric"><b>48</b><span>betreute Marken seit 2021</span></div>
+      <div class="metric"><b>Kostenlos</b><span>unverbindliches Erstgespräch</span></div>
+      <div class="metric"><b>Monatlich</b><span>kündbar statt langer Vertragsbindung</span></div>
       <div class="metric"><b>&lt;14 Tage</b><span>bis zur ersten Live-Kampagne</span></div>
+      <div class="metric"><b>Reporting</b><span>transparent und regelmäßig</span></div>
     </div>
-    <p class="results-note">Beispielhafte Durchschnittswerte aus laufenden Mandaten. Ergebnisse variieren je nach Branche und Budget.</p>
   </div>
 </section>
 
-<!-- VORGEHEN (numbered horizontal steps) -->
+<!-- VORGEHEN (4 numbered cards) -->
 <section id="vorgehen">
   <div class="wrap">
     <div class="sec-head reveal">
-      <h2>So arbeiten wir zusammen.</h2>
-      <p>Kein Blindflug. Sie wissen von Tag eins, woran wir arbeiten und woran wir gemessen werden.</p>
+      <h2>So läuft die Zusammenarbeit ab</h2>
+      <p>Von der ersten Anfrage bis zu messbaren Ergebnissen. Klar strukturiert und ohne Risiko für dich.</p>
     </div>
-    <div class="steps reveal">
-      <div class="step">
-        <div class="step-n">01</div>
-        <h3>Analyse</h3>
-        <p>Wir schauen uns Zahlen, Zielgruppe und Wettbewerb an und definieren gemeinsam ein klares Ziel.</p>
+    <div class="process-grid">
+      <div class="pstep reveal">
+        <div class="pstep-n">01</div>
+        <div class="icon-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+        </div>
+        <h3>Erstgespräch</h3>
+        <p>Wir lernen dich, dein Angebot und deine Ziele kennen. Kostenlos und unverbindlich.</p>
       </div>
-      <div class="step">
-        <div class="step-n">02</div>
-        <h3>Aufbau</h3>
-        <p>Wir bauen Website, Tracking und die ersten Kampagnen auf. Sauber, messbar und startklar.</p>
+      <div class="pstep reveal">
+        <div class="pstep-n">02</div>
+        <div class="icon-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".5"/></svg>
+        </div>
+        <h3>Strategie</h3>
+        <p>Wir entwickeln einen klaren Plan, der genau auf dein Unternehmen und deine Zielgruppe zugeschnitten ist.</p>
       </div>
-      <div class="step">
-        <div class="step-n">03</div>
-        <h3>Skalierung</h3>
-        <p>Was funktioniert, bekommt mehr Budget. Was nicht liefert, fliegt raus. Jeden Monat besser.</p>
+      <div class="pstep reveal">
+        <div class="pstep-n">03</div>
+        <div class="icon-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18L18 6"/><path d="M9 6h9v9"/></svg>
+        </div>
+        <h3>Umsetzung</h3>
+        <p>Wir setzen Kampagnen, Inhalte und deine Online-Präsenz professionell für dich um.</p>
+      </div>
+      <div class="pstep reveal">
+        <div class="pstep-n">04</div>
+        <div class="icon-tile" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M5 15l5-5 4 3 5-7"/></svg>
+        </div>
+        <h3>Optimierung</h3>
+        <p>Wir analysieren die Ergebnisse laufend und verbessern kontinuierlich, damit dein Erfolg wächst.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CASES (alternating large media, max 2 consecutive) -->
-<section id="cases">
+<!-- WERTE (left headline + 2x2 cards) -->
+<section id="werte">
   <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Ausgewählte Cases</span>
-      <h2>Zahlen, die für sich sprechen.</h2>
-    </div>
-
-    <div class="case reveal">
-      <div class="case-media">
-        <img src="https://picsum.photos/seed/lindgruen-interior-shop/900/620" alt="Lindgruen Interior Onlineshop" loading="lazy" />
+    <div class="values-layout">
+      <div class="values-head reveal">
+        <h2>Wir schaffen, was andere nicht schaffen.</h2>
+        <p>Eine erfolgreiche Zusammenarbeit basiert auf Vertrauen, klarer Kommunikation und nachvollziehbaren Ergebnissen. Diese Werte bilden die Grundlage unserer Arbeit.</p>
       </div>
-      <div class="case-body">
-        <span class="cell-num">Interior &amp; E-Commerce</span>
-        <h3>Lindgruen Interior</h3>
-        <p>Neue Landingpage plus Meta-Kampagnen für den Möbel-Onlineshop. In vier Monaten vom Nebengeschäft zur planbaren Umsatzquelle.</p>
-        <div class="case-result">
-          <div><b>4,1x</b><span>Return on Ad Spend</span></div>
-          <div><b>-38%</b><span>Kosten pro Bestellung</span></div>
+      <div class="values-grid">
+        <div class="value-card reveal">
+          <div class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".5"/></svg>
+          </div>
+          <h3>Zielorientierung</h3>
+          <p>Jede Maßnahme verfolgt ein klares Ziel: mehr Sichtbarkeit, mehr Anfragen und nachhaltiges Wachstum für dein Unternehmen.</p>
+        </div>
+        <div class="value-card reveal">
+          <div class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5h5"/></svg>
+          </div>
+          <h3>Transparenz</h3>
+          <p>Offene Kommunikation und nachvollziehbare Ergebnisse. Du weißt jederzeit, welche Maßnahmen umgesetzt werden und welche Ergebnisse erzielt werden.</p>
+        </div>
+        <div class="value-card reveal">
+          <div class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M5 15l5-5 4 3 5-7"/></svg>
+          </div>
+          <h3>Kontinuierliche Optimierung</h3>
+          <p>Online-Marketing ist kein einmaliges Projekt. Durch regelmäßige Analysen und Anpassungen werden Kampagnen und Inhalte stetig verbessert.</p>
+        </div>
+        <div class="value-card reveal">
+          <div class="icon-tile" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.2-3 6.9-7 8-4-1.1-7-3.8-7-8V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h3>Persönliche Betreuung</h3>
+          <p>Direkter Ansprechpartner, schnelle Kommunikation und individuelle Lösungen statt standardisierter Massenabfertigung.</p>
         </div>
       </div>
-    </div>
-
-    <div class="case flip reveal">
-      <div class="case-media">
-        <img src="https://picsum.photos/seed/nordform-studio-brand/900/620" alt="Nordform Studio Markenauftritt" loading="lazy" />
-      </div>
-      <div class="case-body">
-        <span class="cell-num">Handwerk &amp; Dienstleistung</span>
-        <h3>Nordform Studio</h3>
-        <p>Social Media Management und Lead-Kampagnen für das Tischler-Studio. Der Terminkalender ist heute Wochen im Voraus gefüllt.</p>
-        <div class="case-result">
-          <div><b>+210%</b><span>Anfragen pro Monat</span></div>
-          <div><b>6 Wo.</b><span>Vorlauf im Kalender</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section>
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <h2>Was Kundinnen und Kunden sagen.</h2>
-    </div>
-    <div class="quotes">
-      <figure class="quote reveal">
-        <blockquote>"Zum ersten Mal weiß ich genau, was mein Marketing bringt. Die Anfragen kommen konstant, nicht mehr in Wellen."</blockquote>
-        <figcaption class="who">
-          <img src="https://picsum.photos/seed/jana-brehm-portrait/120/120" alt="" />
-          <div><b>Jana Brehm</b><span>Gründerin, Lindgruen Interior</span></div>
-        </figcaption>
-      </figure>
-      <figure class="quote reveal">
-        <blockquote>"Ehrliche Beratung statt Buzzwords. WN-Webting hat unseren Kalender in drei Monaten spürbar voller gemacht."</blockquote>
-        <figcaption class="who">
-          <img src="https://picsum.photos/seed/marek-falk-portrait/120/120" alt="" />
-          <div><b>Marek Falk</b><span>Geschäftsführer, Nordform Studio</span></div>
-        </figcaption>
-      </figure>
     </div>
   </div>
 </section>
@@ -526,9 +249,9 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
       <div class="foot-cols">
         <div class="foot-col">
           <h4>Leistungen</h4>
-          <a href="#leistungen">Meta-Ads</a>
-          <a href="#leistungen">Web-Design</a>
-          <a href="#leistungen">Social Media</a>
+          <a href="meta-ads.html">Meta-Ads</a>
+          <a href="social-media-management.html">Social-Media-Management</a>
+          <a href="website-management.html">Website-Management</a>
         </div>
         <div class="foot-col">
           <h4>Unternehmen</h4>
