@@ -1,7 +1,7 @@
 /* ============================================================
    WN-Webting - shared design system (used by all pages)
    Theme lock: LIGHT for the whole site.
-   Accent lock: ONE accent (electric blue) for all action colors.
+   Accent lock: ONE accent (dark olive green #273610) for all action colors.
    Shape rule: media/surfaces = 16px, buttons = pill, inputs = 10px.
    Fonts: Space Grotesk (display) + system sans (body).
    ============================================================ */
@@ -15,8 +15,8 @@
   --muted-2:   #9a9aa1;
   --line:      rgba(0,0,0,.10);
   --line-2:    rgba(0,0,0,.15);
-  --accent:    #2f4bff;   /* standout action color - single accent */
-  --accent-hover:#1e3bf0;
+  --accent:    #273610;   /* standout action color - single accent */
+  --accent-hover:#34481a;
   --accent-ink:#ffffff;   /* text ON the accent */
   --radius:    16px;
   --radius-sm: 10px;
@@ -57,7 +57,7 @@ img{ display:block; max-width:100%; }
   will-change:transform; white-space:nowrap;
 }
 .btn:active{ transform:translateY(1px) scale(.985); }
-.btn-primary{ background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 24px rgba(47,75,255,.22); }
+.btn-primary{ background:var(--accent); color:var(--accent-ink); box-shadow:0 8px 24px rgba(39,54,16,.22); }
 .btn-primary:hover{ background:var(--accent-hover); }
 .btn-ghost{ background:transparent; color:var(--text); border-color:var(--line-2); }
 .btn-ghost:hover{ border-color:var(--text); }
@@ -83,7 +83,8 @@ header.nav{
 }
 .nav .wrap{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; }
 .brand{ font-family:var(--display); font-weight:700; font-size:1.15rem; letter-spacing:-.02em; display:flex; align-items:center; gap:.55rem; }
-.brand .dot{ width:9px; height:9px; border-radius:999px; background:var(--accent); box-shadow:0 0 12px rgba(47,75,255,.6); }
+.brand .dot{ width:9px; height:9px; border-radius:999px; background:var(--accent); box-shadow:0 0 12px rgba(39,54,16,.6); flex:0 0 auto; }
+.brand-logo{ height:28px; width:auto; flex:0 0 auto; border-radius:4px; display:block; }
 .nav-links{ display:flex; align-items:center; gap:2rem; }
 .nav-links a{ font-size:.95rem; color:var(--muted); transition:color .2s var(--ease); }
 .nav-links a:hover{ color:var(--text); }
@@ -99,7 +100,7 @@ header.nav{
   box-shadow:0 10px 26px rgba(0,0,0,.14); background:#ddd;
 }
 .hero-card img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.03); }
-.hero-card::after{ content:""; position:absolute; inset:0; background:rgba(47,75,255,.06); }
+.hero-card::after{ content:""; position:absolute; inset:0; background:rgba(39,54,16,.06); }
 
 .hero-center{
   position:absolute; inset:0; z-index:10; pointer-events:none;
@@ -143,6 +144,7 @@ section:not(.hero){ padding:112px 0; }
 .service-media{ border-radius:var(--radius); overflow:hidden; aspect-ratio:16/11; margin-bottom:26px; background:var(--bg-3); }
 .service-media img{ width:100%; height:100%; object-fit:cover; transition:transform .6s var(--ease); }
 .service-card:hover .service-media img{ transform:scale(1.03); }
+.photo-muted{ filter:grayscale(0.9) contrast(1.05) brightness(0.97); }
 .service-card h3{ font-size:1.65rem; margin:0 0 1rem; }
 .service-card p{ color:var(--muted); font-size:1rem; flex:1 0 auto; }
 .service-card .btn{ margin-top:1.8rem; align-self:flex-start; }
@@ -193,7 +195,7 @@ section:not(.hero){ padding:112px 0; }
 .cta-inner{
   border:1px solid var(--line-2); border-radius:calc(var(--radius) + 6px);
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(47,75,255,.08), transparent 55%),
+    radial-gradient(120% 120% at 100% 0%, rgba(39,54,16,.08), transparent 55%),
     var(--bg-2);
   padding:64px; display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
 }
@@ -208,7 +210,7 @@ form{ display:grid; gap:18px; }
   transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
 }
 .field input::placeholder, .field textarea::placeholder{ color:var(--muted-2); }
-.field input:focus, .field textarea:focus, .field select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,75,255,.15); }
+.field input:focus, .field textarea:focus, .field select:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(39,54,16,.15); }
 .field textarea{ min-height:96px; resize:vertical; }
 form .btn-primary{ justify-content:center; margin-top:4px; }
 .form-note{ font-size:.8rem; color:var(--muted-2); text-align:center; }
