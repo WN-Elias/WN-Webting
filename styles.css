@@ -84,11 +84,41 @@ header.nav{
 .nav .wrap{ display:flex; align-items:center; justify-content:space-between; gap:1.5rem; }
 .brand{ font-family:var(--display); font-weight:700; font-size:1.15rem; letter-spacing:-.02em; display:flex; align-items:center; gap:.55rem; }
 .brand .dot{ width:9px; height:9px; border-radius:999px; background:var(--accent); box-shadow:0 0 12px rgba(39,54,16,.6); flex:0 0 auto; }
-.brand-logo{ height:28px; width:auto; flex:0 0 auto; border-radius:4px; display:block; }
+.brand-logo{ height:20px; width:auto; flex:0 0 auto; border-radius:3px; display:block; }
 .nav-links{ display:flex; align-items:center; gap:2rem; }
 .nav-links a{ font-size:.95rem; color:var(--muted); transition:color .2s var(--ease); }
 .nav-links a:hover{ color:var(--text); }
 .nav-cta{ display:flex; align-items:center; gap:1rem; }
+
+/* ---------- nav dropdown (hover to reveal service subpages) ---------- */
+.nav-item{ position:relative; display:flex; align-items:center; }
+.nav-item > a{ display:flex; align-items:center; gap:.35rem; }
+.nav-chevron{ width:14px; height:14px; transition:transform .2s var(--ease); }
+.nav-item:hover .nav-chevron{ transform:rotate(180deg); }
+/* invisible bridge: keeps the item "hovered" while the cursor crosses the
+   gap between the link and the dropdown, so the menu doesn't close early. */
+.nav-item::after{
+  content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+  width:240px; height:14px;
+}
+.nav-dropdown{
+  position:absolute; top:calc(100% + 14px); left:50%; transform:translate(-50%, 6px);
+  min-width:240px; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+  box-shadow:0 20px 45px rgba(0,0,0,.10); padding:8px;
+  display:flex; flex-direction:column; gap:2px;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .18s var(--ease), transform .18s var(--ease), visibility .18s;
+  z-index:60;
+}
+.nav-item:hover .nav-dropdown,
+.nav-dropdown:hover{
+  opacity:1; visibility:visible; pointer-events:auto; transform:translate(-50%, 0);
+}
+.nav-dropdown a{
+  font-size:.92rem; font-weight:500; color:var(--text); padding:.65rem .8rem; border-radius:8px;
+  transition:background .15s var(--ease), color .15s var(--ease);
+}
+.nav-dropdown a:hover{ background:var(--bg-3); color:var(--accent); }
 
 /* ---------- hero (scroll-morph image field, centered composition) ---------- */
 .hero{ position:relative; height:100dvh; min-height:640px; overflow:hidden; }
