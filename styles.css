@@ -319,6 +319,17 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
 }
 .contact-badge .dot{ width:8px; height:8px; border-radius:999px; background:var(--accent); }
 
+/* ---------- legal pages (Impressum, Datenschutz) ---------- */
+.legal-wrap{ max-width:760px; }
+.legal-wrap h2{ font-size:1.4rem; margin:0 0 1.1rem; }
+.legal-block{ margin-bottom:3rem; }
+.legal-block:last-child{ margin-bottom:0; }
+.legal-wrap p{ color:var(--muted); font-size:1rem; line-height:1.75; margin-bottom:1rem; }
+.legal-wrap p:last-child{ margin-bottom:0; }
+.legal-wrap ul{ margin:0 0 1rem; padding-left:1.25rem; color:var(--muted); line-height:1.75; }
+.legal-wrap li{ margin-bottom:.3rem; }
+.legal-wrap strong{ color:var(--text); font-weight:600; }
+
 /* ---------- responsive ---------- */
 @media (max-width:960px){
   .nav-links{ display:none; }
