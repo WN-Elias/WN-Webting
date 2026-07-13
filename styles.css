@@ -102,12 +102,16 @@ header.nav{
   width:240px; height:14px;
 }
 .nav-dropdown{
-  position:absolute; top:calc(100% + 14px); left:50%; transform:translate(-50%, 6px);
-  min-width:240px; background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius-sm);
-  box-shadow:0 20px 45px rgba(0,0,0,.10); padding:8px;
-  display:flex; flex-direction:column; gap:2px;
+  position:absolute; top:calc(100% + 10px); left:50%; transform:translate(-50%, 4px);
+  min-width:230px; padding:6px;
+  background:rgba(245,245,243,.7);
+  backdrop-filter:blur(20px) saturate(160%);
+  -webkit-backdrop-filter:blur(20px) saturate(160%);
+  border:1px solid rgba(0,0,0,.06); border-radius:var(--radius-sm);
+  box-shadow:0 16px 40px rgba(0,0,0,.07);
+  display:flex; flex-direction:column; gap:1px;
   opacity:0; visibility:hidden; pointer-events:none;
-  transition:opacity .18s var(--ease), transform .18s var(--ease), visibility .18s;
+  transition:opacity .16s var(--ease), transform .16s var(--ease), visibility .16s;
   z-index:60;
 }
 .nav-item:hover .nav-dropdown,
@@ -115,10 +119,10 @@ header.nav{
   opacity:1; visibility:visible; pointer-events:auto; transform:translate(-50%, 0);
 }
 .nav-dropdown a{
-  font-size:.92rem; font-weight:500; color:var(--text); padding:.65rem .8rem; border-radius:8px;
+  font-size:.88rem; font-weight:500; color:var(--muted); padding:.6rem .75rem; border-radius:7px;
   transition:background .15s var(--ease), color .15s var(--ease);
 }
-.nav-dropdown a:hover{ background:var(--bg-3); color:var(--accent); }
+.nav-dropdown a:hover{ background:rgba(0,0,0,.05); color:var(--text); }
 
 /* ---------- hero (scroll-morph image field, centered composition) ---------- */
 .hero{ position:relative; height:100dvh; min-height:640px; overflow:hidden; }
