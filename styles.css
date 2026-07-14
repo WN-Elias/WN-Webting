@@ -270,12 +270,38 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
    ============================================================ */
 
 /* page hero (no ring animation - a clean editorial banner) */
-.page-hero{ padding:72px 0 40px; background:var(--bg-2); border-bottom:1px solid var(--line); }
+.page-hero{ position:relative; padding:72px 0 40px; background:var(--bg-2); border-bottom:1px solid var(--line); }
 .back-link{ display:inline-flex; align-items:center; gap:.5rem; color:var(--muted); font-size:.95rem; margin-bottom:2rem; transition:color .2s var(--ease); }
 .back-link:hover{ color:var(--text); }
 .page-hero h1{ font-size:clamp(2.6rem,6vw,4.4rem); margin:1.2rem 0 0; max-width:16ch; }
 .page-hero .lead{ font-size:1.2rem; color:var(--muted); margin-top:1.5rem; max-width:56ch; }
 .page-hero .hero-actions{ justify-content:flex-start; margin-top:2.4rem; }
+
+/* ---------- page-hero video background (Meta-Ads only, opt-in via modifier) ---------- */
+.page-hero--video{ overflow:hidden; border-bottom-color:transparent; }
+.hero-video-wrap{
+  position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
+}
+.hero-video{
+  position:absolute; left:0; top:-15%; width:100%; height:130%;
+  object-fit:cover; transform:translateZ(0);
+  backface-visibility:hidden; will-change:transform, opacity;
+}
+.hero-video-overlay{
+  position:absolute; inset:0;
+  background:linear-gradient(
+    to bottom,
+    rgba(255,255,255,.15) 0%,
+    rgba(255,255,255,.05) 50%,
+    rgba(255,255,255,.35) 100%
+  );
+}
+.page-hero--video .wrap{ position:relative; z-index:2; }
+/* video-bg pages read fine as dark text on the light overlay; no color changes needed */
+
+@media (prefers-reduced-motion: reduce){
+  .hero-video{ transform:none !important; opacity:1 !important; }
+}
 
 /* detail (rich text) section: two-column intro + content */
 .detail-grid{ display:grid; grid-template-columns:1fr 1.1fr; gap:64px; align-items:start; }

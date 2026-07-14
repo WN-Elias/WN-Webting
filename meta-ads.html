@@ -36,7 +36,13 @@
 </header>
 
 <!-- PAGE HERO -->
-<section class="page-hero">
+<section class="page-hero page-hero--video">
+  <div class="hero-video-wrap" aria-hidden="true">
+    <video class="hero-video" autoplay muted loop playsinline preload="auto">
+      <source src="hero-meta-ads.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-video-overlay"></div>
+  </div>
   <div class="wrap">
     <a href="index.html#leistungen" class="back-link"><span aria-hidden="true">&larr;</span> Alle Leistungen</a>
     <span class="eyebrow">Leistung</span>
@@ -199,5 +205,44 @@
 </footer>
 
 <script src="app.js"></script>
+<!-- Hero video parallax: GSAP loaded only here, not on other subpages -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var section = document.querySelector('.page-hero--video');
+  var video = document.querySelector('.hero-video');
+  if(!section || !video) return;
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  var isMobile = window.matchMedia('(max-width: 640px)').matches;
+  var travel = isMobile ? -8 : -20;   // upward parallax distance, reduced on mobile
+  var scaleTo = isMobile ? 1.03 : 1.08;
+
+  gsap.to(video, {
+    yPercent: travel,
+    scale: scaleTo,
+    opacity: 0.92,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true
+    }
+  });
+
+  // Web fonts swapping in after initial layout can shift the page height;
+  // re-measure once fonts (and any late images) have actually settled.
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
+  }
+  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
+})();
+</script>
 </body>
 </html>
