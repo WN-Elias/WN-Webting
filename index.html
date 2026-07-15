@@ -226,6 +226,7 @@
         <p>Im kostenlosen Erstgespräch schauen wir auf Ihre Ziele und sagen ehrlich, ob und wie wir helfen können. Ganz ohne Verpflichtung.</p>
       </div>
       <form id="lead-form" novalidate>
+        <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none" />
         <div class="field">
           <label for="name">Name</label>
           <input id="name" name="name" type="text" placeholder="Vor- und Nachname" required />
@@ -241,6 +242,7 @@
         <button type="submit" class="btn btn-primary" data-magnetic>Erstgespräch anfragen <span class="btn-arrow">&rarr;</span></button>
         <p class="form-note">Antwort in der Regel innerhalb von 24 Stunden.</p>
         <div class="form-ok" id="form-ok">Danke. Wir melden uns in Kürze bei Ihnen.</div>
+        <div class="form-error" id="form-error"></div>
       </form>
     </div>
   </div>
@@ -486,14 +488,83 @@
     });
   }
 
+  /* Real submission via Web3Forms -- see the comment in app.js (used by
+     the service subpages) for why the access key below is safe to keep
+     client-side; both copies must be updated together, see
+     WEB3FORMS_SETUP.md. */
+  var WEB3FORMS_ACCESS_KEY = '7c3b79e9-b39c-46d9-84ff-4b305c04eb29';
+  var WEB3FORMS_ENDPOINT = 'https://api.web3forms.com/submit';
+  var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   var form = document.getElementById('lead-form');
   if(form){
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var errorBox = document.getElementById('form-error');
+
+    function showFormError(msg){
+      if(errorBox){ errorBox.textContent = msg; errorBox.style.display = 'block'; }
+    }
+    function clearFormError(){
+      if(errorBox){ errorBox.style.display = 'none'; }
+    }
+    function setFormLoading(isLoading){
+      if(!submitBtn) return;
+      submitBtn.disabled = isLoading;
+      if(isLoading){
+        submitBtn.dataset.originalLabel = submitBtn.innerHTML;
+        submitBtn.style.opacity = '.7';
+        submitBtn.innerHTML = 'Wird gesendet …';
+      } else if(submitBtn.dataset.originalLabel){
+        submitBtn.style.opacity = '';
+        submitBtn.innerHTML = submitBtn.dataset.originalLabel;
+      }
+    }
+
     form.addEventListener('submit', function(e){
       e.preventDefault();
+      clearFormError();
+
       var name = form.querySelector('#name'), email = form.querySelector('#email');
-      if(!name.value.trim() || !email.value.trim()){ (name.value.trim()?email:name).focus(); return; }
-      form.querySelectorAll('.field, .btn, .form-note').forEach(function(el){ el.style.display='none'; });
-      document.getElementById('form-ok').style.display='block';
+      if(!name.value.trim()){ name.focus(); showFormError('Bitte gib deinen Namen an.'); return; }
+      if(!email.value.trim() || !EMAIL_PATTERN.test(email.value.trim())){
+        email.focus();
+        showFormError('Bitte gib eine gültige E-Mail-Adresse an.');
+        return;
+      }
+
+      // Honeypot: real visitors never see or fill this field; bots often do.
+      var honeypot = form.querySelector('input[name="botcheck"]');
+      if(honeypot && honeypot.checked){
+        form.querySelectorAll('.field, .btn, .form-note').forEach(function(el){ el.style.display='none'; });
+        document.getElementById('form-ok').style.display='block';
+        return;
+      }
+
+      var data = new FormData(form);
+      data.append('access_key', WEB3FORMS_ACCESS_KEY);
+      data.append('submission_time', new Date().toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' }));
+      data.append('subject', 'Neue Kontaktanfrage über wn-webting.de');
+
+      setFormLoading(true);
+      fetch(WEB3FORMS_ENDPOINT, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: data
+      })
+        .then(function(res){ return res.json().then(function(json){ return { ok: res.ok, json: json }; }); })
+        .then(function(result){
+          setFormLoading(false);
+          if(result.ok && result.json && result.json.success){
+            form.querySelectorAll('.field, .btn, .form-note, .form-error').forEach(function(el){ el.style.display='none'; });
+            document.getElementById('form-ok').style.display='block';
+          } else {
+            showFormError('Senden hat nicht geklappt. Bitte versuch es noch einmal oder schreib uns direkt an hallo@wn-webting.de.');
+          }
+        })
+        .catch(function(){
+          setFormLoading(false);
+          showFormError('Keine Verbindung möglich. Bitte versuch es noch einmal oder schreib uns direkt an hallo@wn-webting.de.');
+        });
     });
   }
 })();
