@@ -224,12 +224,28 @@
   var scaleTo = isMobile ? 1.03 : 1.08;
 
   // The video is scrubbed like a timeline: scrolling down plays it forward,
-  // scrolling up plays it backward. Needs the real duration, so wait for
-  // metadata before building the tween.
+  // scrolling up plays it backward. Needs a fully buffered video (seeking
+  // into undownloaded data stalls), so wait for canplaythrough, not just
+  // metadata.
   function initScrollScrub(){
     video.pause();
+
+    // Split into two tweens with different scrub "lag":
+    // - currentTime seeks are never instant (the browser decodes from the
+    //   last keyframe), so give it more smoothing to hide that latency.
+    // - the transform is cheap/instant, but a touch of smoothing still
+    //   removes the micro-jitter of raw wheel/trackpad deltas.
     gsap.to(video, {
       currentTime: video.duration,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 0.6
+      }
+    });
+    gsap.to(video, {
       yPercent: travel,
       scale: scaleTo,
       opacity: 0.92,
@@ -238,12 +254,13 @@
         trigger: section,
         start: 'top top',
         end: 'bottom top',
-        scrub: true
+        scrub: 0.2
       }
     });
 
-    // This tween is often created after fonts/load already fired (it waits
-    // on video metadata), so refresh immediately once layout is final...
+    // These tweens are often created after fonts/load already fired (they
+    // wait on video readiness), so refresh immediately once layout is
+    // final...
     ScrollTrigger.refresh();
     // ...and again on any later shift (fonts swapping in, late images).
     if(document.fonts && document.fonts.ready){
@@ -252,10 +269,10 @@
     window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
   }
 
-  if(video.readyState >= 1 && video.duration){
+  if(video.readyState >= 4){ // HAVE_ENOUGH_DATA: can already play through
     initScrollScrub();
   } else {
-    video.addEventListener('loadedmetadata', initScrollScrub, { once: true });
+    video.addEventListener('canplaythrough', initScrollScrub, { once: true });
   }
 })();
 </script>
