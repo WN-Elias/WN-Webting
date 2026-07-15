@@ -36,7 +36,14 @@
 </header>
 
 <!-- PAGE HERO -->
-<section class="page-hero">
+<section class="page-hero page-hero--video">
+  <div class="hero-video-wrap" aria-hidden="true">
+    <video class="hero-video" muted playsinline preload="auto">
+      <source src="hero-social-media-management.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-video-overlay"></div>
+    <div class="hero-video-watermark-mask"></div>
+  </div>
   <div class="wrap">
     <a href="index.html#leistungen" class="back-link"><span aria-hidden="true">&larr;</span> Alle Leistungen</a>
     <span class="eyebrow">Leistung</span>
@@ -199,5 +206,9 @@
 </footer>
 
 <script src="app.js"></script>
+<!-- Hero scroll-video: GSAP loaded only on pages with a video hero -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="hero-scroll-video.js"></script>
 </body>
 </html>

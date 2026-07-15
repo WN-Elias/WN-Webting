@@ -277,15 +277,15 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
 .page-hero .lead{ font-size:1.2rem; color:var(--muted); margin-top:1.5rem; max-width:56ch; }
 .page-hero .hero-actions{ justify-content:flex-start; margin-top:2.4rem; }
 
-/* ---------- page-hero video background (Meta-Ads only, opt-in via modifier) ---------- */
+/* ---------- page-hero video background (opt-in via modifier; used on the
+   Meta-Ads, Website-Management and Social-Media-Management hero sections) ---------- */
 .page-hero--video{ overflow:hidden; border-bottom-color:transparent; }
 .hero-video-wrap{
   position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none;
 }
 .hero-video{
-  position:absolute; left:0; top:-15%; width:100%; height:130%;
-  object-fit:cover; transform:translateZ(0);
-  backface-visibility:hidden; will-change:transform, opacity;
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; transform:translateZ(0); backface-visibility:hidden;
 }
 .hero-video-overlay{
   position:absolute; inset:0;
@@ -295,6 +295,15 @@ footer{ border-top:1px solid var(--line); padding:64px 0 40px; background:var(--
     rgba(255,255,255,.05) 50%,
     rgba(255,255,255,.35) 100%
   );
+}
+/* Soft corner patch that hides the source clips' bottom-right watermark.
+   Radial + generous size so it still covers the mark across breakpoints,
+   without reading as an obvious box -- it just blends into the overlay. */
+.hero-video-watermark-mask{
+  position:absolute; right:0; bottom:0;
+  width:min(28%, 320px); height:min(26%, 240px);
+  min-width:160px; min-height:120px;
+  background:radial-gradient(circle at 100% 100%, rgba(245,245,243,.98) 0%, rgba(245,245,243,.98) 60%, rgba(245,245,243,0) 88%);
 }
 .page-hero--video .wrap{ position:relative; z-index:2; }
 /* video-bg pages read fine as dark text on the light overlay; no color changes needed */

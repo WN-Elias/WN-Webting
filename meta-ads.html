@@ -42,6 +42,7 @@
       <source src="hero-meta-ads.mp4" type="video/mp4" />
     </video>
     <div class="hero-video-overlay"></div>
+    <div class="hero-video-watermark-mask"></div>
   </div>
   <div class="wrap">
     <a href="index.html#leistungen" class="back-link"><span aria-hidden="true">&larr;</span> Alle Leistungen</a>
@@ -205,76 +206,9 @@
 </footer>
 
 <script src="app.js"></script>
-<!-- Hero video parallax: GSAP loaded only here, not on other subpages -->
+<!-- Hero scroll-video: GSAP loaded only on pages with a video hero -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script>
-(function(){
-  var section = document.querySelector('.page-hero--video');
-  var video = document.querySelector('.hero-video');
-  if(!section || !video) return;
-
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduce || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-
-  gsap.registerPlugin(ScrollTrigger);
-
-  var isMobile = window.matchMedia('(max-width: 640px)').matches;
-  var travel = isMobile ? -8 : -20;   // upward parallax distance, reduced on mobile
-  var scaleTo = isMobile ? 1.03 : 1.08;
-
-  // The video is scrubbed like a timeline: scrolling down plays it forward,
-  // scrolling up plays it backward. Needs a fully buffered video (seeking
-  // into undownloaded data stalls), so wait for canplaythrough, not just
-  // metadata.
-  function initScrollScrub(){
-    video.pause();
-
-    // Split into two tweens with different scrub "lag":
-    // - currentTime seeks are never instant (the browser decodes from the
-    //   last keyframe), so give it more smoothing to hide that latency.
-    // - the transform is cheap/instant, but a touch of smoothing still
-    //   removes the micro-jitter of raw wheel/trackpad deltas.
-    gsap.to(video, {
-      currentTime: video.duration,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.6
-      }
-    });
-    gsap.to(video, {
-      yPercent: travel,
-      scale: scaleTo,
-      opacity: 0.92,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.2
-      }
-    });
-
-    // These tweens are often created after fonts/load already fired (they
-    // wait on video readiness), so refresh immediately once layout is
-    // final...
-    ScrollTrigger.refresh();
-    // ...and again on any later shift (fonts swapping in, late images).
-    if(document.fonts && document.fonts.ready){
-      document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
-    }
-    window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
-  }
-
-  if(video.readyState >= 4){ // HAVE_ENOUGH_DATA: can already play through
-    initScrollScrub();
-  } else {
-    video.addEventListener('canplaythrough', initScrollScrub, { once: true });
-  }
-})();
-</script>
+<script src="hero-scroll-video.js"></script>
 </body>
 </html>
