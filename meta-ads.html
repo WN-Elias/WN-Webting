@@ -38,7 +38,7 @@
 <!-- PAGE HERO -->
 <section class="page-hero page-hero--video">
   <div class="hero-video-wrap" aria-hidden="true">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto">
+    <video class="hero-video" muted playsinline preload="auto">
       <source src="hero-meta-ads.mp4" type="video/mp4" />
     </video>
     <div class="hero-video-overlay"></div>
@@ -223,25 +223,40 @@
   var travel = isMobile ? -8 : -20;   // upward parallax distance, reduced on mobile
   var scaleTo = isMobile ? 1.03 : 1.08;
 
-  gsap.to(video, {
-    yPercent: travel,
-    scale: scaleTo,
-    opacity: 0.92,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true
-    }
-  });
+  // The video is scrubbed like a timeline: scrolling down plays it forward,
+  // scrolling up plays it backward. Needs the real duration, so wait for
+  // metadata before building the tween.
+  function initScrollScrub(){
+    video.pause();
+    gsap.to(video, {
+      currentTime: video.duration,
+      yPercent: travel,
+      scale: scaleTo,
+      opacity: 0.92,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
 
-  // Web fonts swapping in after initial layout can shift the page height;
-  // re-measure once fonts (and any late images) have actually settled.
-  if(document.fonts && document.fonts.ready){
-    document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
+    // This tween is often created after fonts/load already fired (it waits
+    // on video metadata), so refresh immediately once layout is final...
+    ScrollTrigger.refresh();
+    // ...and again on any later shift (fonts swapping in, late images).
+    if(document.fonts && document.fonts.ready){
+      document.fonts.ready.then(function(){ ScrollTrigger.refresh(); });
+    }
+    window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
   }
-  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
+
+  if(video.readyState >= 1 && video.duration){
+    initScrollScrub();
+  } else {
+    video.addEventListener('loadedmetadata', initScrollScrub, { once: true });
+  }
 })();
 </script>
 </body>
